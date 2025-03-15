@@ -20,14 +20,25 @@ DATA = {
     },
     # можете добавить свои рецепты ;)
 }
+def get_valid_servings(request):
+    """Функция для получения и валидации количества порций."""
+    servings = request.GET.get('servings', 1)
+    try:
+        servings = int(servings)
+        if servings < 1:
+            raise ValueError
+    except ValueError:
+        return 1  # Используем значение по умолчанию
+    return servings
 
 def select_recipe(request, name_dish):
-    servings = int(request.GET.get('servings', 1))
+    servings = get_valid_servings(request)
     recipe = DATA.get(name_dish, {})
+    new_recipe = {}
     for ingridient, count in recipe.items():
         new_count = count * servings
-        recipe[ingridient] = new_count
+        new_recipe[ingridient] = new_count
     context = {
-       'recipe': recipe
+       'recipe': new_recipe
     }
     return render(request, 'calculator/index.html', context)
